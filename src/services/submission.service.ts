@@ -12,6 +12,7 @@ import { ngoSubmission,
     conferenceAttendeeSubmission
 } from '@prisma/client/sql'
 
+import { Prisma } from '@prisma/client';
 import { db } from "../util/config/db";
 import { CastBigIntFromJson } from '../util/parsejson';
 import logger from '../util/logger';
@@ -173,5 +174,31 @@ export class SubmissionService {
         }
 
 
+    }
+
+    async getSubmissionHistogram(startDate?: string, endDate?: string) {
+        const sql = Prisma.sql`
+            SELECT
+                CAST(t1.date_created AS DATE) as date,
+                COUNT(CASE WHEN t4.meta_value = 'NGO or Foundation' THEN t1.entry_id END) as ngo,
+                COUNT(CASE WHEN t4.meta_value = 'Local Company' THEN t1.entry_id END) as localCompany,
+                COUNT(CASE WHEN t4.meta_value = 'International Company' THEN t1.entry_id END) as internationalCompany,
+                COUNT(CASE WHEN t4.meta_value = 'Embassy Delegation' THEN t1.entry_id END) as embassy,
+                COUNT(CASE WHEN t4.meta_value = 'Local Startup' THEN t1.entry_id END) as startup
+            FROM
+                wpjm_frmt_form_entry_meta as t1
+                INNER JOIN wpjm_frmt_form_entry as entry ON t1.entry_id = entry.entry_id
+                LEFT JOIN wpjm_frmt_form_entry_meta as t4 ON t1.entry_id = t4.entry_id AND t4.meta_key = 'select-7'
+            WHERE
+                entry.form_id = 4783
+                AND t1.meta_key = 'name-1'
+                ${startDate && endDate ? Prisma.sql`AND t1.date_created BETWEEN ${startDate} AND ${endDate}` : Prisma.empty}
+            GROUP BY
+                CAST(t1.date_created AS DATE)
+            ORDER BY
+                date;
+        `;
+        const histogramData = await db.$queryRaw(sql);
+        return CastBigIntFromJson(histogramData);
     }
 }

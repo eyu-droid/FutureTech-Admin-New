@@ -1038,6 +1038,7 @@ model followupnotes {
   isCompleted  Int      @default(0)
 }
 
+
 model messages {
   id         String          @id @db.VarChar(255)
   sender     String          @db.VarChar(255)

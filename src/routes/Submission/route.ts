@@ -20,6 +20,7 @@ submissionRoute.get('/submission/conference', AuthAPIKey, (req:Request, res:Resp
 
 
 submissionRoute.get('/submission/stat', AuthAPIKey, (req:Request, res:Response)=>submissionController.getSubmissionStat(req, res));
+// submissionRoute.get('/submission/stat/histogram', AuthAPIKey, (req:Request, res:Response)=>submissionController.getSubmissionHistogram(req, res));
 
 
 
