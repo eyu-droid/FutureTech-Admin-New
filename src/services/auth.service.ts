@@ -29,7 +29,8 @@ export class AuthService{
             createdAt: new Date(),
             updatedAt: new Date(),
             isLocked: 0,
-            isNew: 1
+                        isNew: 1,
+            roleId: null
         }
         try{
             

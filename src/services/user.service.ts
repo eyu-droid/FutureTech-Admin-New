@@ -1,3 +1,4 @@
+import { dashboard_user } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import forgotEmailTemplate from "../mail/templates/forgotpassword";
 import { User } from "../types/user";
@@ -30,7 +31,8 @@ export class UserService{
                 createdAt: true,
                 updatedAt: true,
                 isLocked: true,
-                isNew: true
+                isNew: true,
+                id: true
             }
         });
         if(!user){
@@ -39,8 +41,8 @@ export class UserService{
         return user;
     }
 
-    async getAllUsers(filter: string): Promise<User[]> {
-        
+    async getAllUsers(filter: string): Promise<dashboard_user[]> {
+
         const users = await db.dashboard_user.findMany({
             where: {
                 email: {
@@ -72,7 +74,7 @@ export class UserService{
 
     }
 
-    async createUser(user: User): Promise<User> {
+        async createUser(user: User): Promise<dashboard_user> {
         const userExists = await db.dashboard_user.findUnique({
             where: {
                 email: user.email
@@ -88,13 +90,14 @@ export class UserService{
                 email: user.email,
                 password: hashedPassword,
                 isLocked: user.isLocked ? 1 : 0,
-                isNew: 1
+                isNew: 1,
+                roleId: null
             }
         });
         return newUser;
     }
 
-    async deleteUser(userId: string): Promise<User> {
+    async deleteUser(userId: string): Promise<dashboard_user> {
         logger.info('Deleting user with id', userId);
         if (!userId) {
             throw new Error("User id is missing");
@@ -116,7 +119,7 @@ export class UserService{
         }
     }
 
-    async editUser(userId: string, data: User): Promise<User> {
+    async editUser(userId: string, data: User): Promise<dashboard_user> {
       logger.info('Editing user with id', userId);
       if (!userId) {
         throw new Error("User id is missing")

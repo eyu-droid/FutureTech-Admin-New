@@ -13,6 +13,7 @@ import followupNoteRoute from './routes/FollowUpNote/route';
 import mailRoute from './routes/Mail/route';
 import uploadRouter from './routes/Uploads/route';
 import partnerRoute from './routes/Partner/route';
+import roleRoutes from './routes/Role';
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/api/progress', followupNoteRoute);
 app.use('/api/mail', mailRoute);
 app.use('/api/partner', partnerRoute);
 app.use('/api/upload', uploadRouter);
+app.use('/api/role', roleRoutes);
 app.get('/', (req, res) => {
   res.send('Hello, World!');
 });

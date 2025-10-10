@@ -978,6 +978,8 @@ model dashboard_user {
   updatedAt DateTime @default(now()) @db.DateTime(0)
   isLocked  Int      @default(0)
   isNew     Int      @default(1)
+  roleId    Int?
+  Role      Role?
 }
 
 model ticket_db {
@@ -1049,23 +1051,69 @@ model messages {
 }
 
 model Role {
-  id          Int       @id @default(autoincrement())
-  role        Role_role
-  createdBy   String    @db.VarChar(255)
-  createdDate DateTime  @db.DateTime(6)
-  updatedDate DateTime  @db.DateTime(6)
+  id             Int            @id @default(autoincrement())
+  role           Role_role
+  userId         String         @unique(map: "userId") @db.VarChar(255)
+  createdBy      String         @db.VarChar(255)
+  createdDate    DateTime       @default(now()) @db.DateTime(6)
+  updatedBy      String         @db.VarChar(255)
+  updatedAt      DateTime       @db.DateTime(6)
+  dashboard_user dashboard_user @relation(fields: [userId], references: [id], onUpdate: Restrict, map: "Role_ibfk_1")
 }
 
 model partners {
-  id             String   @id @db.VarChar(255)
-  fullName       String   @db.VarChar(100)
-  companyName    String   @db.VarChar(100)
-  email          String   @db.VarChar(100)
-  phone          String   @db.VarChar(100)
-  areaOfInterest String   @db.VarChar(100)
-  license        String   @db.VarChar(255)
-  createdDate    DateTime @default(now()) @db.DateTime(0)
-  updateDate     DateTime @default(now()) @db.DateTime(0)
+  id          String   @id @db.VarChar(255)
+  fullName    String   @db.VarChar(100)
+  companyName String   @db.VarChar(100)
+  email       String   @db.VarChar(100)
+  phoneNo     String   @db.VarChar(100)
+  interest    String   @db.VarChar(100)
+  license     String   @db.VarChar(255)
+  createdDate DateTime @default(now()) @db.DateTime(0)
+  updateDate  DateTime @default(now()) @db.DateTime(0)
+}
+
+model checkinTracker {
+  id          Int      @id @default(autoincrement())
+  attendeeId  String   @db.VarChar(255)
+  checkedTime DateTime @default(now()) @db.DateTime(0)
+}
+
+model international_company {
+  id               Int      @id @default(autoincrement())
+  fullName         String   @db.VarChar(100)
+  workEmail        String   @unique(map: "workEmail") @db.VarChar(100)
+  phone            String   @db.VarChar(100)
+  position         String   @db.VarChar(100)
+  companyName      String   @db.VarChar(100)
+  country          String   @db.VarChar(100)
+  companyProfile   String   @db.VarChar(255)
+  companyWebsite   String   @db.VarChar(100)
+  passport         String   @db.VarChar(255)
+  areaInterest     String   @db.VarChar(100)
+  sponsorshipTier  String   @db.VarChar(50)
+  interestType     String   @db.VarChar(50)
+  pitchProduct     String   @db.VarChar(5)
+  scheduleMeetings String   @db.VarChar(5)
+  createdAt        DateTime @default(now()) @db.DateTime(0)
+  updatedAt        DateTime @default(now()) @db.DateTime(0)
+}
+
+model localcompany {
+  id                     Int    @id @default(autoincrement())
+  fullName               String @db.VarChar(100)
+  email                  String @unique(map: "email") @db.VarChar(100)
+  phoneNo                String @db.VarChar(100)
+  areaOfInterset         String @db.VarChar(100)
+  companyLicense         String @db.VarChar(255)
+  sponsorYouthinitiative String @db.VarChar(5)
+  listedTechDir          String @db.VarChar(5)
+  interest               String @db.VarChar(50)
+  numberOfAttendees      Int
+  position               String @db.VarChar(100)
+  companyName            String @db.VarChar(100)
+  CompanyWebsite         String @db.VarChar(100)
+  companyProfile         String @db.VarChar(255)
 }
 
 enum wpjm_blpwp_stats_action {
@@ -1136,7 +1184,7 @@ enum Role_role {
   System
   Admin
   Marketer
-  Ticket_Agent @map("Ticket Agent")
+  TicketAgent
 }
 
 enum wpjm_wftrafficrates_hitType {

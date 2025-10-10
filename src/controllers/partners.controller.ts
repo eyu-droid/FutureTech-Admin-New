@@ -9,7 +9,7 @@ import { generateId } from '../util/generateId';
 
 export class PartnersController {
     private partnerService;
-    constructor() { 
+    constructor() {
         this.partnerService = new PartnerService
     }
 
@@ -42,26 +42,26 @@ export class PartnersController {
                         id: await generateId(),
                         companyName: element['company name'],
                         email: element['company email'],
-                        phone: element['phone'],
-                        areaOfInterest: element['interset Area'],
+                        phoneNo: element['phone'],
+                        interest: element['interset Area'],
                         license: element['License'],
                         createdDate: new Date(),
                         updateDate: new Date(),
                         fullName: element['name']
                     }
-                    
+
                      await this.partnerService.createPartner(partnerDto);
                 }catch(err){
-                    
+
                     return
                 }
-                 
+
             });
         })
         .on('error', (err) => {
-            logger.error(err); 
+            logger.error(err);
             fs.unlinkSync(filePath)
-            fs.rm(filePath, (err)=>logger.error(err)); 
+            fs.rm(filePath, (err)=>logger.error(err));
         })
 
 
