@@ -48,6 +48,9 @@ export class UserService{
                 email: {
                     contains: filter
                 }
+            },
+            include: {
+                Role: true
             }
         });
         return users;
@@ -74,28 +77,53 @@ export class UserService{
 
     }
 
-        async createUser(user: User): Promise<dashboard_user> {
-        const userExists = await db.dashboard_user.findUnique({
-            where: {
-                email: user.email
+                async createUser(user: User, createdBy: string): Promise<dashboard_user> {
+
+                const userExists = await db.dashboard_user.findUnique({
+
+                    where: {
+
+                        email: user.email
+
+                    }
+
+                });
+
+                if (userExists) {
+
+                    throw new Error("User already exists");
+
+                }
+
+                const hashedPassword = hashSync(user.password, genSaltSync(10));
+
+                const newUser = await db.dashboard_user.create({
+
+                    data: {
+
+                        id: await generateId(),
+
+                        email: user.email,
+
+                        password: hashedPassword,
+
+                        isLocked: user.isLocked ? 1 : 0,
+
+                        isNew: 1,
+
+                        roleId: user.roleId,
+
+                        createdBy: createdBy,
+
+                        updatedBy: createdBy
+
+                    }
+
+                });
+
+                return newUser;
+
             }
-        });
-        if (userExists) {
-            throw new Error("User already exists");
-        }
-        const hashedPassword = hashSync(user.password, genSaltSync(10));
-        const newUser = await db.dashboard_user.create({
-            data: {
-                id: await generateId(),
-                email: user.email,
-                password: hashedPassword,
-                isLocked: user.isLocked ? 1 : 0,
-                isNew: 1,
-                roleId: null
-            }
-        });
-        return newUser;
-    }
 
     async deleteUser(userId: string): Promise<dashboard_user> {
         logger.info('Deleting user with id', userId);
@@ -119,7 +147,7 @@ export class UserService{
         }
     }
 
-    async editUser(userId: string, data: User): Promise<dashboard_user> {
+    async editUser(userId: string, data: User, updatedBy: string): Promise<dashboard_user> {
       logger.info('Editing user with id', userId);
       if (!userId) {
         throw new Error("User id is missing")
@@ -130,7 +158,8 @@ export class UserService{
               id: userId
             },
             data: {
-              isLocked: data.isLocked ? 1 : 0
+              isLocked: data.isLocked ? 1 : 0,
+              updatedBy: updatedBy
             }
           });
           logger.info('User edited successfully', updatedUser);

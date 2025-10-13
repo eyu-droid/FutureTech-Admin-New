@@ -1,98 +1,159 @@
+import { db } from "../util/config/db";
+import { generateId } from "../util/generateId";
+import logger from "../util/logger";
 
-import { PrismaClient, Role, Role_role } from '@prisma/client';
-import { HttpException } from '../types/HttpException';
-
-const prisma = new PrismaClient();
-
-export const getAllRoles = async (): Promise<any[]> => {
-  const roles = await prisma.role.findMany({
-    include: {
-      dashboard_user: {
-        select: {
-          email: true,
-        },
+export class RoleService {
+  async createRole(role: { name: string }) {
+    const roleExists = await db.role.findUnique({
+      where: {
+        name: role.name,
       },
-    },
-  });
-
-  return roles.map((role) => {
-    const { dashboard_user, ...rest } = role;
-    return {
-      ...rest,
-      user: {
-        email: dashboard_user?.email,
+    });
+    if (roleExists) {
+      throw new Error("Role already exists");
+    }
+    const newRole = await db.role.create({
+      data: {
+        name: role.name,
       },
-    };
-  });
-};
-
-export const getRoleById = async (id: number): Promise<any | null> => {
-  const role = await prisma.role.findUnique({
-    where: { id },
-    include: {
-      dashboard_user: {
-        select: {
-          email: true,
-        },
-      },
-    },
-  });
-
-  if (!role) {
-    return null;
+    });
+    return newRole;
   }
 
-  const { dashboard_user, ...rest } = role;
-
-  return {
-    ...rest,
-    user: {
-      email: dashboard_user?.email,
-    },
-  };
-};
-
-export const createRole = async (
-  role: Role_role,
-  userId: string,
-  createdBy: string
-): Promise<Role> => {
-  const existingRole = await prisma.role.findFirst({
-    where: { userId },
-  });
-
-  if (existingRole) {
-    throw new HttpException(409, 'User already has a role');
+  async getRoles() {
+    const roles = await db.role.findMany();
+    return roles;
   }
 
-  return prisma.role.create({
-    data: {
-      role,
-      userId,
-      createdBy,
-            updatedBy: createdBy,
-      updatedAt: new Date(),
-    },
-  });
-};
+  async getAllRoles() {
+    const users = await db.dashboard_user.findMany({
+      where: {
+        Role: {
+          isNot: null
+        }
+      },
+      include: {
+        Role: true,
+      },
+    });
+    return users.map(user => ({
+        id: user.Role?.id,
+        userId: user.id,
+        role: user.Role?.name,
+        createdBy: user.createdBy,
+        createdDate: user.createdAt,
+        updatedBy: user.updatedBy,
+        updatedAt: user.updatedAt,
+    }));
+  }
 
-export const updateRole = async (
-  id: number,
-  role: Role_role,
-  updatedBy: string
-): Promise<Role> => {
-  return prisma.role.update({
-    where: { id },
-    data: {
-      role,
-            updatedBy: updatedBy,
-      updatedAt: new Date(),
-    },
-  });
-};
+  async getRoleById(id: number) {
+    const role = await db.role.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!role) {
+      throw new Error("Role not found");
+    }
+    return role;
+  }
 
-export const deleteRole = async (id: number): Promise<Role> => {
-  return prisma.role.delete({
-    where: { id },
-  });
-};
+  async updateRole(id: number, name: string) {
+    const role = await db.role.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!role) {
+      throw new Error("Role not found");
+    }
+    const updatedRole = await db.role.update({
+      where: {
+        id,
+      },
+      data: {
+        name,
+      },
+    });
+    return updatedRole;
+  }
+
+  async updateUserRole(userId: string, role: string, updatedBy: string) {
+    const user = await db.dashboard_user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const roleRecord = await db.role.findUnique({
+      where: {
+        name: role,
+      },
+    });
+
+    if (!roleRecord) {
+      throw new Error("Role not found");
+    }
+
+    const updatedUser = await db.dashboard_user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        Role: {
+          connect: {
+            id: roleRecord.id,
+          },
+        },
+        updatedBy,
+        updatedAt: new Date(),
+      },
+    });
+
+    return updatedUser;
+  }
+
+  async deleteUserRole(userId: string) {
+    const user = await db.dashboard_user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    await db.dashboard_user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        Role: {
+          disconnect: true,
+        },
+      },
+    });
+  }
+
+  async deleteRole(id: number) {
+    const role = await db.role.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!role) {
+      throw new Error("Role not found");
+    }
+    await db.role.delete({
+      where: {
+        id,
+      },
+    });
+  }
+}

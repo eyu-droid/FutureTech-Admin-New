@@ -13,7 +13,7 @@ import followupNoteRoute from './routes/FollowUpNote/route';
 import mailRoute from './routes/Mail/route';
 import uploadRouter from './routes/Uploads/route';
 import partnerRoute from './routes/Partner/route';
-import roleRoutes from './routes/Role';
+import roleRoutes from './routes/Role/route';
 
 const app = express();
 

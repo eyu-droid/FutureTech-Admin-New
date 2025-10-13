@@ -1,80 +1,135 @@
+import { Request, Response } from "express";
+import { RoleService } from "../services/role.service";
+import logger from "../util/logger";
 
-import { Request, Response, NextFunction } from 'express';
-import * as roleService from '../services/role.service';
-import { HttpException } from '../types/HttpException';
-
-export const getAllRoles = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const roles = await roleService.getAllRoles();
-    res.json(roles);
-  } catch (error) {
-    next(error);
+export class RoleController {
+  private roleService;
+  constructor() {
+    this.roleService = new RoleService();
   }
-};
 
-export const getRoleById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-    const role = await roleService.getRoleById(Number(id));
-    if (!role) {
-      throw new HttpException(404, 'Role not found');
+  async createRole(req: Request, res: Response) {
+    try {
+      const newRole = await this.roleService.createRole(req.body);
+      res.status(201).json({ message: "role created successfully", data: newRole });
+    } catch (error) {
+      logger.error(error);
+      res.status(400).json({ message: (error as Error).message });
     }
-    res.json(role);
-  } catch (error) {
-    next(error);
   }
-};
 
-export const createRole = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { role, userId, createdBy } = req.body;
-        if (!role || !userId || !createdBy) {
-      throw new HttpException(400, 'Missing required fields');
+  async getRoles(req: Request, res: Response) {
+    try {
+      const roles = await this.roleService.getRoles();
+      res.status(200).json({ message: "fetched successful", data: roles || [] });
+    } catch (error) {
+      logger.error(error);
+      res.status(400).json({ message: (error as Error).message });
     }
-    const newRole = await roleService.createRole(role, userId, createdBy);
-    res.status(201).json(newRole);
-  } catch (error) {
-    next(error);
   }
-};
 
-export const updateRole = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-    const { role, updatedBy } = req.body;
-    const updatedRole = await roleService.updateRole(Number(id), role, updatedBy);
-    res.json(updatedRole);
-  } catch (error) {
-    next(error);
-  }
-};
+  async getAllRoles(req: Request, res: Response) {
 
-export const deleteRole = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { id } = req.params;
-    await roleService.deleteRole(Number(id));
-    res.status(204).send();
-  } catch (error) {
-    next(error);
+    try {
+
+      const roles = await this.roleService.getAllRoles();
+
+      res.status(200).json({ message: "fetched successful", data: roles });
+
+    } catch (error) {
+
+      logger.error(error);
+
+      res.status(400).json({ message: (error as Error).message });
+
+    }
+
   }
-};
+
+  async getRoleById(req: Request, res: Response) {
+
+    try {
+
+      const role = await this.roleService.getRoleById(parseInt(req.params.id, 10));
+
+      res.status(200).json({ message: "fetched successful", data: role });
+
+    } catch (error) {
+
+      logger.error(error);
+
+      res.status(400).json({ message: (error as Error).message });
+
+    }
+
+  }
+
+
+
+  async updateRole(req: Request, res: Response) {
+
+    try {
+
+      const role = await this.roleService.updateRole(
+
+        parseInt(req.params.id, 10),
+
+        req.body.name
+
+      );
+
+      res.status(200).json({ message: "updated successful", data: role });
+
+    } catch (error) {
+
+      logger.error(error);
+
+      res.status(400).json({ message: (error as Error).message });
+
+    }
+
+  }
+
+  async updateUserRole(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+      const { role, updatedBy } = req.body;
+      const updatedRole = await this.roleService.updateUserRole(userId, role, updatedBy);
+      res.status(200).json({ message: "user role updated successfully", data: updatedRole });
+    } catch (error) {
+      logger.error(error);
+      res.status(400).json({ message: (error as Error).message });
+    }
+  }
+
+  async deleteUserRole(req: Request, res: Response) {
+    try {
+      const { userId } = req.params;
+      await this.roleService.deleteUserRole(userId);
+      res.status(200).json({ message: "user role deleted successfully" });
+    } catch (error) {
+      logger.error(error);
+      res.status(400).json({ message: (error as Error).message });
+    }
+  }
+
+
+  async deleteRole(req: Request, res: Response) {
+
+    try {
+
+      await this.roleService.deleteRole(parseInt(req.params.id, 10));
+
+      res.status(200).json({ message: "deleted successful" });
+
+    } catch (error) {
+
+      logger.error(error);
+
+      res.status(400).json({ message: (error as Error).message });
+
+    }
+
+  }
+
+}

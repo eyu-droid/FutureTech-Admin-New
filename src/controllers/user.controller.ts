@@ -84,7 +84,10 @@ export class UserController{
 
     async createUser(req: Request, res: Response) {
         try {
-            const newUser = await this.userService.createUser(req.body);
+            if (!req.user) {
+                throw new Error("User not authenticated");
+            }
+            const newUser = await this.userService.createUser(req.body, req.user.userId);
             res.status(201).json({ message: 'user created successfully', data: newUser });
         } catch (error) {
             logger.error(error);
@@ -94,8 +97,11 @@ export class UserController{
 
     async editUser(req: Request, res: Response) {
         try {
+            if (!req.user) {
+                throw new Error("User not authenticated");
+            }
             const { id } = req.params;
-            const updatedUser = await this.userService.editUser(id, req.body);
+            const updatedUser = await this.userService.editUser(id, req.body, req.user.userId);
             res.status(200).json({ message: 'user updated successfully', data: updatedUser });
         } catch (error) {
             logger.error(error);
