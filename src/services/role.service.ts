@@ -3,10 +3,11 @@ import { generateId } from "../util/generateId";
 import logger from "../util/logger";
 
 export class RoleService {
-  async createRole(role: { name: string }) {
+  async createRole(role: { name: string, createdBy:string | undefined}) {
     const roleExists = await db.role.findUnique({
       where: {
         name: role.name,
+        
       },
     });
     if (roleExists) {
@@ -14,9 +15,11 @@ export class RoleService {
     }
     const newRole = await db.role.create({
       data: {
-        name: role.name,
+        name: role.name.trim(),
+        createdBy: role.createdBy,
       },
     });
+    console.log(newRole, role.createdBy);
     return newRole;
   }
 
@@ -25,26 +28,19 @@ export class RoleService {
     return roles;
   }
 
-  async getAllRoles() {
+  async getUsersWithoutRoles() {
     const users = await db.dashboard_user.findMany({
       where: {
-        Role: {
-          isNot: null
+        roleId: {
+          notIn: null
         }
       },
       include: {
         Role: true,
       },
     });
-    return users.map(user => ({
-        id: user.Role?.id,
-        userId: user.id,
-        role: user.Role?.name,
-        createdBy: user.createdBy,
-        createdDate: user.createdAt,
-        updatedBy: user.updatedBy,
-        updatedAt: user.updatedAt,
-    }));
+    console.log(users)
+    return users
   }
 
   async getRoleById(id: number) {

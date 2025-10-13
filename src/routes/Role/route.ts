@@ -8,7 +8,7 @@ const roleController = new RoleController();
 const roleRoutes = Router();
 
 roleRoutes.post('/create', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.createRole(req, res));
-roleRoutes.get('/getAllRoles', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.getAllRoles(req, res));
+roleRoutes.get('/getUsersWithoutRoles', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.getUsersWithoutRoles(req, res));
 roleRoutes.get('/getRoles', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.getRoles(req, res));
 roleRoutes.put('/updateUserRole/:userId', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.updateUserRole(req, res));
 roleRoutes.delete('/deleteUserRole/:userId', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.deleteUserRole(req, res));

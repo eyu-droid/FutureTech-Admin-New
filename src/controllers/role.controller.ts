@@ -9,8 +9,12 @@ export class RoleController {
   }
 
   async createRole(req: Request, res: Response) {
+    const role = {
+      name: req.body.name,
+      createdBy: req.user?.userId
+    }
     try {
-      const newRole = await this.roleService.createRole(req.body);
+      const newRole = await this.roleService.createRole(role);
       res.status(201).json({ message: "role created successfully", data: newRole });
     } catch (error) {
       logger.error(error);
@@ -28,11 +32,11 @@ export class RoleController {
     }
   }
 
-  async getAllRoles(req: Request, res: Response) {
+  async getUsersWithoutRoles(req: Request, res: Response) {
 
     try {
 
-      const roles = await this.roleService.getAllRoles();
+      const roles = await this.roleService.getUsersWithoutRoles();
 
       res.status(200).json({ message: "fetched successful", data: roles });
 
