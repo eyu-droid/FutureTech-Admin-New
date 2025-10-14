@@ -9,7 +9,7 @@ const roleController = new RoleController();
 const router = Router();
 
 router.get('/getRoles', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.getRoles(req, res));
-router.get('/', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.getAllRoles(req, res));
+
 router.post('/', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.createRole(req, res));
 router.get('/:id', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.getRoleById(req, res));
 router.put('/:id', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => roleController.updateRole(req, res));

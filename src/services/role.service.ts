@@ -32,7 +32,7 @@ export class RoleService {
     const users = await db.dashboard_user.findMany({
       where: {
         roleId: {
-          notIn: null
+          not: null
         }
       },
       include: {

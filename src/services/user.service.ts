@@ -79,6 +79,7 @@ export class UserService{
 
                 async createUser(user: User, createdBy: string): Promise<dashboard_user> {
 
+                console.log(user);
                 const userExists = await db.dashboard_user.findUnique({
 
                     where: {
