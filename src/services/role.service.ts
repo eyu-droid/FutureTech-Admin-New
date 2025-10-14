@@ -101,11 +101,7 @@ export class RoleService {
         id: userId,
       },
       data: {
-        Role: {
-          connect: {
-            id: roleRecord.id,
-          },
-        },
+        roleId: roleRecord.id,
         updatedBy,
         updatedAt: new Date(),
       },
