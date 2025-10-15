@@ -55,7 +55,7 @@ export class RoleService {
     return role;
   }
 
-  async updateRole(id: number, name: string) {
+  async updateRole(id: number, name: string, updatedBy: string) {
     const role = await db.role.findUnique({
       where: {
         id,
@@ -70,6 +70,8 @@ export class RoleService {
       },
       data: {
         name,
+        updatedBy,
+        updatedAt: new Date(),
       },
     });
     return updatedRole;

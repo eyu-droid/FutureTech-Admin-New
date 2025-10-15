@@ -74,12 +74,31 @@ export class RoleController {
 
     try {
 
+      const { id } = req.params;
+      const { name } = req.body;
+      const  updatedBy  = req.user?.userId;
+
+      if (!id || !name) {
+        res.status(400).json({ message: "id and name are required" });
+        return;
+      }
+
+      const roleId = parseInt(id, 10);
+
+      if (isNaN(roleId)) {
+        res.status(400).json({ message: "id must be a number" });
+        return;
+      }
+
+      if (!updatedBy) {
+        res.status(401).json({ message: "unauthorized" });
+        return;
+      }
+
       const role = await this.roleService.updateRole(
-
-        parseInt(req.params.id, 10),
-
-        req.body.name
-
+        roleId,
+        name,
+        updatedBy
       );
 
       res.status(200).json({ message: "updated successful", data: role });
@@ -97,7 +116,14 @@ export class RoleController {
   async updateUserRole(req: Request, res: Response) {
     try {
       const { userId } = req.params;
-      const { role, updatedBy } = req.body;
+      const { role } = req.body;
+      const updatedBy = req.user?.userId;
+
+      if (!updatedBy) {
+        res.status(401).json({ message: "unauthorized" });
+        return;
+      }
+
       const updatedRole = await this.roleService.updateUserRole(userId, role, updatedBy);
       res.status(200).json({ message: "user role updated successfully", data: updatedRole });
     } catch (error) {
