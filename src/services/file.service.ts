@@ -32,4 +32,28 @@ export class FileService{
         }
 
     }
+
+    async writeToCsvFile(filePath:string, data:any[], cb:(error?:Error)=>void){
+        try{
+            const ws = xlsx.utils.json_to_sheet(data);
+            const wb = xlsx.utils.book_new();
+            xlsx.utils.book_append_sheet(wb, ws, 'Sheet1');
+            xlsx.writeFile(wb, filePath, { bookType: 'csv' });
+            cb();
+        }catch(err){
+            cb(err as Error);
+        }
+    }
+
+    async writeToExcelFile(filePath:string, data:any[], cb:(error?:Error)=>void){
+        try{
+            const ws = xlsx.utils.json_to_sheet(data);
+            const wb = xlsx.utils.book_new();
+            xlsx.utils.book_append_sheet(wb, ws, 'Sheet1');
+            xlsx.writeFile(wb, filePath, { bookType: 'xlsx' });
+            cb();
+        }catch(err){
+            cb(err as Error);
+        }
+    }
 }
