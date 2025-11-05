@@ -108,6 +108,97 @@ export class SubmissionsController {
         res.status(200).json({ message: 'Submission fetched', data: submissions });
     }
 
+    async deleteNGOSubmission(req: Request, res: Response) {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: 'Missing ID' });
+        }
+        try {
+            await this.submissionService.deleteNGOSubmission(BigInt(id));
+            res.status(200).json({ message: 'Submission deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to delete submission' });
+        }
+    }
+
+    async deleteLocalCompanySubmission(req: Request, res: Response) {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: 'Missing ID' });
+        }
+        try {
+            await this.submissionService.deleteLocalCompanySubmission(BigInt(id));
+            res.status(200).json({ message: 'Submission deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to delete submission' });
+        }
+    }
+
+    async deleteEmbassySubmission(req: Request, res: Response) {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: 'Missing ID' });
+        }
+        try {
+            await this.submissionService.deleteEmbassySubmission(BigInt(id));
+            res.status(200).json({ message: 'Submission deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to delete submission' });
+        }
+    }
+
+    async deleteInternationalCompanySubmission(req: Request, res: Response) {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: 'Missing ID' });
+        }
+        try {
+            await this.submissionService.deleteInternationalCompanySubmission(BigInt(id));
+            res.status(200).json({ message: 'Submission deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to delete submission' });
+        }
+    }
+
+    async deleteStartupSubmission(req: Request, res: Response) {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: 'Missing ID' });
+        }
+        try {
+            await this.submissionService.deleteStartupSubmission(BigInt(id));
+            res.status(200).json({ message: 'Submission deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to delete submission' });
+        }
+    }
+
+    async deleteEventSubmission(req: Request, res: Response) {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: 'Missing ID' });
+        }
+        try {
+            await this.submissionService.deleteEventSubmission(BigInt(id));
+            res.status(200).json({ message: 'Submission deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to delete submission' });
+        }
+    }
+
+    async deleteConferenceSubmission(req: Request, res: Response) {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: 'Missing ID' });
+        }
+        try {
+            await this.submissionService.deleteConferenceSubmission(BigInt(id));
+            res.status(200).json({ message: 'Submission deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to delete submission' });
+        }
+    }
+
 
     async getSubmissionStat(req:Request, res: Response){
         const totalNGOSubmission = await this.submissionService.getNGOSubmissions() || [];

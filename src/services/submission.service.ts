@@ -174,4 +174,88 @@ export class SubmissionService {
 
 
     }
+
+    async deleteNGOSubmission(entry_id: bigint) {
+        try {
+            return await db.$transaction([
+                db.wpjm_frmt_form_entry_meta.deleteMany({ where: { entry_id } }),
+                db.wpjm_frmt_form_entry.delete({ where: { entry_id } })
+            ]);
+        } catch (err) {
+            logger.error(err + '');
+            throw err;
+        }
+    }
+
+    async deleteLocalCompanySubmission(entry_id: bigint) {
+        try {
+            return await db.$transaction([
+                db.wpjm_frmt_form_entry_meta.deleteMany({ where: { entry_id } }),
+                db.wpjm_frmt_form_entry.delete({ where: { entry_id } })
+            ]);
+        } catch (err) {
+            logger.error(err + '');
+            throw err;
+        }
+    }
+
+    async deleteEmbassySubmission(entry_id: bigint) {
+        try {
+            return await db.$transaction([
+                db.wpjm_frmt_form_entry_meta.deleteMany({ where: { entry_id } }),
+                db.wpjm_frmt_form_entry.delete({ where: { entry_id } })
+            ]);
+        } catch (err) {
+            logger.error(err + '');
+            throw err;
+        }
+    }
+
+    async deleteInternationalCompanySubmission(entry_id: bigint) {
+        try {
+            return await db.$transaction([
+                db.wpjm_frmt_form_entry_meta.deleteMany({ where: { entry_id } }),
+                db.wpjm_frmt_form_entry.delete({ where: { entry_id } })
+            ]);
+        } catch (err) {
+            logger.error(err + '');
+            throw err;
+        }
+    }
+
+    async deleteStartupSubmission(entry_id: bigint) {
+        try {
+            return await db.$transaction([
+                db.wpjm_frmt_form_entry_meta.deleteMany({ where: { entry_id } }),
+                db.wpjm_frmt_form_entry.delete({ where: { entry_id } })
+            ]);
+        } catch (err) {
+            logger.error(err + '');
+            throw err;
+        }
+    }
+
+    async deleteEventSubmission(entry_id: bigint) {
+        try {
+            return await db.$transaction([
+                db.wpjm_frmt_form_entry_meta.deleteMany({ where: { entry_id } }),
+                db.wpjm_frmt_form_entry.delete({ where: { entry_id } })
+            ]);
+        } catch (err) {
+            logger.error(err + '');
+            throw err;
+        }
+    }
+
+    async deleteConferenceSubmission(entry_id: bigint) {
+        try {
+            return await db.$transaction([
+                db.wpjm_frmt_form_entry_meta.deleteMany({ where: { entry_id } }),
+                db.wpjm_frmt_form_entry.delete({ where: { entry_id } })
+            ]);
+        } catch (err) {
+            logger.error(err + '');
+            throw err;
+        }
+    }
 }

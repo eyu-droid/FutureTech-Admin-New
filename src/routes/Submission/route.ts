@@ -18,6 +18,14 @@ submissionRoute.get('/submission/startup/:id', AuthAPIKey, (req:Request, res:Res
 submissionRoute.get('/submission/event', AuthAPIKey, (req:Request, res:Response)=>submissionController.getEventSubmissions(req,res))
 submissionRoute.get('/submission/conference', AuthAPIKey, (req:Request, res:Response)=>submissionController.getConferenceSubmissions(req,res))
 
+submissionRoute.delete('/submission/ngo/:id', AuthAPIKey, (req:Request, res:Response)=>submissionController.deleteNGOSubmission(req,res));
+submissionRoute.delete('/submission/localcompany/:id', AuthAPIKey, (req:Request, res:Response)=>submissionController.deleteLocalCompanySubmission(req,res));
+submissionRoute.delete('/submission/embassy/:id', AuthAPIKey, (req:Request, res:Response)=>submissionController.deleteEmbassySubmission(req,res));
+submissionRoute.delete('/submission/internationalcompany/:id', AuthAPIKey, (req:Request, res:Response)=>submissionController.deleteInternationalCompanySubmission(req,res));
+submissionRoute.delete('/submission/startup/:id', AuthAPIKey, (req:Request, res:Response)=>submissionController.deleteStartupSubmission(req,res));
+submissionRoute.delete('/submission/event/:id', AuthAPIKey, (req:Request, res:Response)=>submissionController.deleteEventSubmission(req,res));
+submissionRoute.delete('/submission/conference/:id', AuthAPIKey, (req:Request, res:Response)=>submissionController.deleteConferenceSubmission(req,res));
+
 
 submissionRoute.get('/submission/stat', AuthAPIKey, (req:Request, res:Response)=>submissionController.getSubmissionStat(req, res));
 
