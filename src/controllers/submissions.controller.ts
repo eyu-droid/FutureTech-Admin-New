@@ -199,6 +199,37 @@ export class SubmissionsController {
         }
     }
 
+    async deleteSubmissions(req: Request, res: Response) {
+        const { type } = req.params;
+        const { entry_ids } = req.body;
+
+        if (!type || !entry_ids || !Array.isArray(entry_ids)) {
+            return res.status(400).json({ message: 'Invalid request body' });
+        }
+
+        try {
+            await this.submissionService.deleteSubmissions(type, entry_ids);
+            res.status(200).json({ message: 'Submissions deleted successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to delete submissions' });
+        }
+    }
+
+    async importEventSubmissions(req: Request, res: Response) {
+        const { data } = req.body;
+
+        if (!data || !Array.isArray(data)) {
+            return res.status(400).json({ message: 'Invalid request body' });
+        }
+
+        try {
+            await this.submissionService.importEventSubmissions(data);
+            res.status(200).json({ message: 'Submissions imported successfully' });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to import submissions' });
+        }
+    }
+
 
     async getSubmissionStat(req:Request, res: Response){
         const totalNGOSubmission = await this.submissionService.getNGOSubmissions() || [];

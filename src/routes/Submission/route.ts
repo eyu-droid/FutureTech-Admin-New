@@ -26,6 +26,12 @@ submissionRoute.delete('/submission/startup/:id', AuthAPIKey, (req:Request, res:
 submissionRoute.delete('/submission/event/:id', AuthAPIKey, (req:Request, res:Response)=>submissionController.deleteEventSubmission(req,res));
 submissionRoute.delete('/submission/conference/:id', AuthAPIKey, (req:Request, res:Response)=>submissionController.deleteConferenceSubmission(req,res));
 
+submissionRoute.post('/submission/:type/delete', AuthAPIKey, (req:Request, res:Response)=>submissionController.deleteSubmissions(req,res));
+
+submissionRoute.post('/submission/event/import', AuthAPIKey, (req:Request, res:Response)=>submissionController.importEventSubmissions(req,res));
+
+
+
 
 submissionRoute.get('/submission/stat', AuthAPIKey, (req:Request, res:Response)=>submissionController.getSubmissionStat(req, res));
 

@@ -1,4 +1,5 @@
 export default function defaultTemplate(body?:string, media?:string, customMessage?:string){
+    const formattedBody = body ? body.replace(/\n/g, '<br>') : '';
     return `
     <!DOCTYPE html>
 <html lang="en">
@@ -63,10 +64,10 @@ export default function defaultTemplate(body?:string, media?:string, customMessa
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
                                     <td style="padding: 1.5rem;">
-                                    ${body && `<p style="line-height: 1.625; margin-bottom: 1.5rem; margin-top: 0;">
-                                            ${body}
+                                    ${formattedBody && `<p style="line-height: 1.625; margin-bottom: 1.5rem; margin-top: 0;">
+                                            ${formattedBody}
                                         </p>`}
-                                    ${customMessage}
+                                    ${customMessage || ''}
                                         
                                         ${media && `<img src="cid:${media}" alt="QR Code" width="180" style="display: block; margin: 0 auto; max-width: 100%; height: auto; border: 1px solid #d1d5db; padding: 5px; border-radius: 4px;" />`}
                                     </td>

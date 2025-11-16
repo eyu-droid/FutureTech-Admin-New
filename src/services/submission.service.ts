@@ -258,4 +258,61 @@ export class SubmissionService {
             throw err;
         }
     }
+
+    async deleteSubmissions(type: string, entry_ids: (string | number)[]) {
+        const entryIdsAsBigInt = entry_ids.map(id => BigInt(id));
+
+        try {
+            return await db.$transaction([
+                db.wpjm_frmt_form_entry_meta.deleteMany({ where: { entry_id: { in: entryIdsAsBigInt } } }),
+                db.wpjm_frmt_form_entry.deleteMany({ where: { entry_id: { in: entryIdsAsBigInt } } })
+            ]);
+        } catch (err) {
+            logger.error(err + '');
+            throw err;
+        }
+    }
+
+    async importEventSubmissions(data: any[]) {
+        const formId = 45;
+
+        try {
+            for (const item of data) {
+                await db.$transaction(async (tx) => {
+                    const newEntry = await tx.wpjm_frmt_form_entry.create({
+                        data: {
+                            form_id: formId,
+                            entry_type: 'submission',
+                            date_created: new Date(item['Registered Date'])
+                        }
+                    });
+
+                    const entryId = newEntry.entry_id;
+
+                    await tx.wpjm_frmt_form_entry_meta.createMany({
+                        data: [
+                            {
+                                entry_id: entryId,
+                                meta_key: 'text-1',
+                                meta_value: item['Full Name']
+                            },
+                            {
+                                entry_id: entryId,
+                                meta_key: 'email-1',
+                                meta_value: item['Email']
+                            },
+                            {
+                                entry_id: entryId,
+                                meta_key: 'date-1',
+                                meta_value: item['Registered Date']
+                            }
+                        ]
+                    });
+                });
+            }
+        } catch (err) {
+            logger.error(err + '');
+            throw err;
+        }
+    }
 }
