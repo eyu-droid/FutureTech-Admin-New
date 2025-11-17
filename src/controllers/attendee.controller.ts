@@ -42,14 +42,7 @@ export class AttendeeController {
                 const newOrder = await this.orderService.createOrder(order);
                 if (newOrder) {
                     
-                        const test = await QRCode.toFile(newOrder.orderNo + '.png', newOrder.orderNo);
-                        addToMailQueue({to:newAttendee.email, subject:'Event Invitation', body:'', html:defaultTemplate('', '', TicketTemplate(newAttendee.fullname, newAttendee.email, newAttendee.phone)), attachments:[{ filename: 'qrcode.png', cid: 'qrcode.png', path: newOrder.orderNo + '.png' }]});
-                        mailWorker.on('completed', (job,result)=>{
-                            if(result && Array.isArray(result.rejected) && result.rejected.length > 0){
-                                console.log(result)
-                            }
-                            fs.rm(newOrder.orderNo+'.png', {retryDelay: 1000})
-                        })
+                        addToMailQueue({ attendee: newAttendee, to: '', subject: '', body: '', order: newOrder });
                         res.status(200).json({ data: newOrder, message: 'Order created Successfully' });
                         return;
 
@@ -91,16 +84,7 @@ export class AttendeeController {
                         }
                         
                         const newOrder = await this.orderService.createOrder(order);
-                        await QRCode.toFile(newOrder.orderNo + '.png', newOrder.orderNo);
-                        addToMailQueue({to:newAttendee.email, subject:'Event Invitation', body:'', html:defaultTemplate('', '', TicketTemplate(newAttendee.fullname, newAttendee.email, newAttendee.phone)), attachments:[{ filename: 'qrcode.png', cid: 'qrcode.png', path: newOrder.orderNo + '.png' }]});
-                        mailWorker.on('completed', (job,result)=>{
-                            if(result && Array.isArray(result.rejected) && result.rejected.length > 0){
-                                console.log(result)
-                            }
-                            fs.rm(newOrder.orderNo+'.png', {retryDelay: 1000})
-                        })
-                     
-                        //res.status(200).json({ data: newOrder, message: 'Order created Successfully' });
+                        addToMailQueue({ attendee: newAttendee, to: '', subject: '', body: '', order: newOrder });
                         newAttendees.push(newAttendee);
                     }
                 }catch(error){

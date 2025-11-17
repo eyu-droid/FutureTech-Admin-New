@@ -9,7 +9,6 @@ export class AttendeeService{
     async createAttendee(attendeeDto: AttendeeDTO){
         if(!attendeeDto) throw new Error('missing values');
         try{
-
             const attendee = await db.attendees.findUnique({
                 where:{
                     email: attendeeDto.email
@@ -17,6 +16,20 @@ export class AttendeeService{
             });
             if(attendee){
                return attendee; 
+            }
+
+            const attendeeByFullName = await db.attendees.findUnique({
+                where: {
+                    fullname: attendeeDto.fullname
+                }
+            });
+
+            if (attendeeByFullName) {
+                const updatedAttendee = await db.attendees.update({
+                    where: { id: attendeeByFullName.id },
+                    data: { email: attendeeDto.email, phone: attendeeDto.phone }
+                });
+                return updatedAttendee;
             }
         }catch(error){
             throw error

@@ -22,19 +22,7 @@ export class MailController{
                 const message = await this.messageService.sendMessage({attachedTo: parseInt(email.attachedTo), body: email.body, title: email.title, reciver: email.reciver, sender: req.user?.email?req.user.email:'system@futuretech.com', sentAt: new Date(), sentBy: req.user?.userId?req.user?.userId:'0', status: 'Pending'});
                 if(message){
                     addToMailQueue({to: email.reciver, subject: email.title, body: email.body, html: defaultTemplate(email.body), id: message.id});
-                    mailWorker.on('completed', (job, result)=>{
-                        if(result && Array.isArray(result.rejected) && result.rejected.length === 0){
-                            this.messageService.updateMessageStatus(job.data.id, 'Completed');
-    
-                        }else{
-                            this.messageService.updateMessageStatus(job.data.id, 'Failed');
-                        }
-                    })
                 }
-                mailWorker.on('failed',(job,err)=>{
-                     this.messageService.updateMessageStatus(job?.data.id, 'Failed');
-                     logger.error(`job failed sending to ${job?.data.to}`)
-                })
             }
             //send email logic here
             res.status(200).json({message: 'emails sent successfully'});
@@ -51,6 +39,44 @@ export class MailController{
         }catch(err){
             res.status(500).json({message: 'something went wrong. Please try again'});
             return;
+        }
+    }
+
+    async sendQRCode(req: Request, res: Response) {
+        const { attendees } = req.body;
+
+        if (!attendees || !Array.isArray(attendees) || attendees.length === 0) {
+            return res.status(400).json({ message: 'Invalid request body' });
+        }
+
+        try {
+            for (const attendee of attendees) {
+                const message = await this.messageService.sendMessage({
+                    attachedTo: 0, // Assuming 0 for now, update as needed
+                    body: `QR Code for ${attendee.fullname}`,
+                    title: 'Your QR Code for the Event',
+                    reciver: attendee.email,
+                    sender: req.user?.email || 'system@futuretech.com',
+                    sentAt: new Date(),
+                    sentBy: req.user?.userId || '0',
+                    status: 'Pending'
+                });
+
+                if (message) {
+                    addToMailQueue({
+                        to: attendee.email,
+                        subject: 'Your QR Code for the Event',
+                        body: `Here is your QR code, ${attendee.fullname}.`,
+                        html: '', // We will generate this in the service
+                        attendee: attendee,
+                        id: message.id
+                    });
+                }
+            }
+
+            res.status(200).json({ message: 'QR codes are being sent' });
+        } catch (error) {
+            res.status(500).json({ message: 'Internal server error' });
         }
     }
 }

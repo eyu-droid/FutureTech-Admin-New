@@ -30,8 +30,9 @@ export class CheckInController{
             logger.error(error);
             if(error instanceof PrismaClientKnownRequestError){
                 res.status(400).json({message: 'invalid code'});
+                return;
             }
-            res.status(500).json({message:error});
+            res.status(500).json({message:(error as Error).message});
         }
     }
 }
