@@ -32,7 +32,8 @@ export const mailWorker = new Worker("mailQueue", async (job: Job) => {
             const { attendee, order } = job.data;
             const qrCodeData = order.orderNo;
             const qrCodeImage = await QRCode.toDataURL(qrCodeData);
-            const html = qrCodeTemplate(attendee.fullname, qrCodeImage);
+            const printUrl = `${process.env.FRONTEND_URL}/print-qr/${order.orderNo}?name=${encodeURIComponent(attendee.fullname)}`;
+            const html = qrCodeTemplate(attendee.fullname, qrCodeImage, printUrl);
             const sent = await mailService.sendMail(attendee.email, 'Your Event QR Code', '', html, [{
                 filename: 'qrcode.png',
                 path: qrCodeImage,
