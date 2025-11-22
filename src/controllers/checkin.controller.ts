@@ -17,11 +17,20 @@ export class CheckInController{
             return;
         }
         try{
-            const checkInStatus = await this.checkInService.checkOrderNo(orderNo);
-            if(checkInStatus=='success'){
-                res.status(200).json({message:'Checked in successfully'})
+            const result = await this.checkInService.checkOrderNo(orderNo);
+            // success case
+            if(result && (result as any).status === 'success'){
+                const { order, attendee } = result as any;
+                res.status(200).json({message:'Checked in successfully', data: { order, attendee }});
                 return;
             }
+            // already-checked-in case: return 200 but indicate it was already checked
+            else if(result && (result as any).status === 'already'){
+                const { order, attendee } = result as any;
+                res.status(200).json({message:'Already checked in', data: { order, attendee }});
+                return;
+            }
+            // any other result - treat as validation failure
             else{
                 res.status(400).json({message: 'Can not validate code. Please try again!'});
                 return;

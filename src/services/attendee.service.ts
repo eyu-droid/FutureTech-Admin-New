@@ -15,7 +15,7 @@ export class AttendeeService{
                 }
             });
             if(attendee){
-               return attendee; 
+               return attendee;
             }
 
             const attendeeByFullName = await db.attendees.findUnique({
@@ -35,7 +35,7 @@ export class AttendeeService{
             throw error
         }
         try{
-            
+
             const newAttendee = await db.attendees.create({
                 data:{
                     id: await generateId(),
@@ -47,17 +47,17 @@ export class AttendeeService{
                     updatedAt: new Date()
                 }
             });
-            
+
             return newAttendee;
         }catch(error){
             logger.error(error+' ');
             throw new Error('something went wrong');
-        }        
+        }
 
     }
 
     async getAllAttendees(query?:any){
-        
+
         if(query !== "undefined")
         {
             const filterby = query as string;
@@ -85,12 +85,30 @@ export class AttendeeService{
                                 contains: filterby
                             }
                         },
-                        
+
                     ]
                 },
             })
         }
         return await db.attendees.findMany();
     }
-    
+
+
+    async getAttendeeById(id: string) {
+        if (!id) {
+            throw new Error('Attendee id is required');
+        }
+        try {
+            const attendee = await db.attendees.findUnique({
+                where: {
+                    id: id
+                }
+            });
+            return attendee || null;
+        } catch (error) {
+            logger.error(`Error fetching attendee by id ${id}: ${error}`);
+            throw error;
+        }
+    }
+
 }

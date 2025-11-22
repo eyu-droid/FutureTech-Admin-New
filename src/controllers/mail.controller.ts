@@ -1,14 +1,17 @@
 import { Request, Response } from "express";
 import { addToMailQueue, mailWorker } from "../workers/mail.worker";
 import { MessageService } from "../services/message.service";
+import { OrderService } from "../services/order.service";
 import { Invitation } from "../mail/templates/invitation";
 import defaultTemplate from "../mail/templates/defaulttemplate";
 import logger from "../util/logger";
 
 export class MailController{
     private messageService;
+    private orderService;
     constructor(){
         this.messageService = new MessageService();
+        this.orderService = new OrderService();
     }
 
     async sendMail(req:Request, res:Response){
@@ -51,8 +54,16 @@ export class MailController{
 
         try {
             for (const attendee of attendees) {
+
+                const orderDto = {
+                    attendeeId: attendee.id,
+                    ticket: attendee.ticketType || 'Event'
+                };
+                const order = await this.orderService.createOrder(orderDto);
+
+
                 const message = await this.messageService.sendMessage({
-                    attachedTo: 0, // Assuming 0 for now, update as needed
+                    attachedTo: order ? 0 : 0,
                     body: `QR Code for ${attendee.fullname}`,
                     title: 'Your QR Code for the Event',
                     reciver: attendee.email,
@@ -67,8 +78,9 @@ export class MailController{
                         to: attendee.email,
                         subject: 'Your QR Code for the Event',
                         body: `Here is your QR code, ${attendee.fullname}.`,
-                        html: '', // We will generate this in the service
+                        html: '',
                         attendee: attendee,
+                        order: order,
                         id: message.id
                     });
                 }
@@ -76,6 +88,7 @@ export class MailController{
 
             res.status(200).json({ message: 'QR codes are being sent' });
         } catch (error) {
+            logger.error(`sendQRCode failed: ${error}`);
             res.status(500).json({ message: 'Internal server error' });
         }
     }

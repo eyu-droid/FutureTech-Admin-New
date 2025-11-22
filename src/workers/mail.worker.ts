@@ -31,13 +31,17 @@ export const mailWorker = new Worker("mailQueue", async (job: Job) => {
         } else if (job.name === "sendQRCode") {
             const { attendee, order } = job.data;
             const qrCodeData = order.orderNo;
-            const qrCodeImage = await QRCode.toDataURL(qrCodeData);
-            const printUrl = `${process.env.FRONTEND_URL}/print-qr/${order.orderNo}?name=${encodeURIComponent(attendee.fullname)}`;
-            const html = qrCodeTemplate(attendee.fullname, qrCodeImage, printUrl);
+
+            const qrCodeBuffer = await QRCode.toBuffer(qrCodeData, { type: 'png', width: 400 });
+            const printUrl = `${process.env.FRONTEND_URL}/print-qr/${order.orderNo}?name=${encodeURIComponent(attendee.fullname)}&ticket=${encodeURIComponent(order.ticket ?? '')}`;
+
+            const cidRef = 'qrcode@futuretech';
+            const html = qrCodeTemplate(attendee.fullname, `cid:${cidRef}`, printUrl);
             const sent = await mailService.sendMail(attendee.email, 'Your Event QR Code', '', html, [{
                 filename: 'qrcode.png',
-                path: qrCodeImage,
-                cid: 'qrcode'
+                content: qrCodeBuffer,
+                contentType: 'image/png',
+                cid: cidRef
             }]);
             logger.info(`QR code sent to ${attendee.email}`);
             await messageService.updateMessageStatus(job.data.id, 'Completed');
