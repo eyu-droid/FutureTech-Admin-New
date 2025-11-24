@@ -7,6 +7,7 @@ export interface MailOptions {
     body: string;
     html?: any;
     attachments?:Attachment[];
+    frontendUrl?: string;
     attendee?: any;
     order?: any;
 }

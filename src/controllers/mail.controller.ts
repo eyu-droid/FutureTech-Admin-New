@@ -46,7 +46,8 @@ export class MailController{
     }
 
     async sendQRCode(req: Request, res: Response) {
-        const { attendees } = req.body;
+        // Accept an optional frontendUrl so the server can build print links that use the correct origin
+        const { attendees, frontendUrl } = req.body;
 
         if (!attendees || !Array.isArray(attendees) || attendees.length === 0) {
             return res.status(400).json({ message: 'Invalid request body' });
@@ -74,6 +75,7 @@ export class MailController{
                 });
 
                 if (message) {
+                    // pass frontendUrl into the mail job so the worker can use it (if provided)
                     addToMailQueue({
                         to: attendee.email,
                         subject: 'Your QR Code for the Event',
@@ -81,7 +83,8 @@ export class MailController{
                         html: '',
                         attendee: attendee,
                         order: order,
-                        id: message.id
+                        id: message.id,
+                        frontendUrl: typeof frontendUrl === 'string' && frontendUrl.trim() !== '' ? frontendUrl.trim() : undefined
                     });
                 }
             }
