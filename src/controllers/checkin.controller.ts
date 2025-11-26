@@ -20,14 +20,22 @@ export class CheckInController{
             const result = await this.checkInService.checkOrderNo(orderNo);
             // success case
             if(result && (result as any).status === 'success'){
-                const { order, attendee } = result as any;
-                res.status(200).json({message:'Checked in successfully', data: { order, attendee }});
+                const { order, attendee, confirmed } = result as any;
+                // Log that the confirmed row was created/updated when available
+                if(confirmed && attendee && attendee.id){
+                    logger.info('Confirmed row upserted for attendee: ' + attendee.id);
+                }
+                res.status(200).json({message:'Checked in successfully', data: { order, attendee, confirmed }});
                 return;
             }
             // already-checked-in case: return 200 but indicate it was already checked
             else if(result && (result as any).status === 'already'){
-                const { order, attendee } = result as any;
-                res.status(200).json({message:'Already checked in', data: { order, attendee }});
+                const { order, attendee, confirmed } = result as any;
+                // If a confirmed row exists, log it for visibility
+                if(confirmed && attendee && attendee.id){
+                    logger.info('Attendee already checked in; confirmed row exists for attendee: ' + attendee.id);
+                }
+                res.status(200).json({message:'Already checked in', data: { order, attendee, confirmed }});
                 return;
             }
             // any other result - treat as validation failure
@@ -42,6 +50,24 @@ export class CheckInController{
                 return;
             }
             res.status(500).json({message:(error as Error).message});
+        }
+    }
+
+    /**
+     * GET /attendee/getConfirmedList
+     * Returns rows from the legacy `confirmed` table so the check-in dashboard can render them.
+     * This delegates to CheckInService.getConfirmedList(), which uses a raw query because
+     * `confirmed` is ignored by Prisma.
+     */
+    async getConfirmed(req: Request, res: Response) {
+        try {
+            const list = await this.checkInService.getConfirmedList();
+            res.status(200).json({ message: 'fetched successful', data: list });
+            return;
+        } catch (error) {
+            logger.error('getConfirmed error: ' + (error as Error).message);
+            res.status(500).json({ message: 'unable to fetch confirmed list' });
+            return;
         }
     }
 }

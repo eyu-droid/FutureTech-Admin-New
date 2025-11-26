@@ -19,5 +19,6 @@ const limiter = rateLimit({
 attendeeRoutes.post('/checkout', [AuthAPIKey, limiter], (req:Request, res:Response)=>attendeeController.createAttendee(req, res));
 attendeeRoutes.post('/createBulkAttendees', [AuthAPIKey, AuthGuard], (req:Request<{}, any, {attendees: AttendeeDTO[]}>, res:Response)=>attendeeController.createBulkAttendees(req, res));
 attendeeRoutes.post('/checkin', [AuthAPIKey], (req:Request<CheckInDto>, res:Response)=>checkInController.checkIn(req, res));
+attendeeRoutes.get('/getConfirmedList', [AuthAPIKey], (req: Request, res: Response)=>checkInController.getConfirmed(req, res));
 attendeeRoutes.get('/getAllAttendees', [AuthAPIKey, AuthGuard], (req: Request, res:Response)=>attendeeController.getAllAttendees(req, res));
 export default attendeeRoutes;

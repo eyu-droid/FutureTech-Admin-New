@@ -1,7 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["typedSql"]
-  binaryTargets = ["native", "debian-openssl-1.1.x"]
+  binaryTargets   = ["native", "debian-openssl-1.1.x"]
 }
 
 datasource db {
@@ -1160,6 +1160,16 @@ model roleMenu {
 
   @@unique([menuId, roleId], map: "uq_rolemenu")
   @@index([roleId], map: "fk_role")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model confirmed {
+  id             String   @id @db.VarChar(255)
+  fullname       String   @db.VarChar(100)
+  phone          String   @db.VarChar(20)
+  email          String   @db.VarChar(255)
+  registereddate DateTime @default(now()) @db.DateTime(0)
+  checkedindate  DateTime @default(now()) @db.DateTime(0)
 }
 
 enum wpjm_blpwp_stats_action {
