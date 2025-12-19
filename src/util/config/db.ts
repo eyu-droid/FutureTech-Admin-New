@@ -1,7 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
-const globalForPrisma = global as unknown as { db: PrismaClient };
+declare global {
+  // allow a global Prisma client variable across modules
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
 
-export const db = globalForPrisma.db || new PrismaClient();
+export const db = global.prisma ?? new PrismaClient();
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.db = db;
+if (process.env.NODE_ENV !== 'production') global.prisma = db;

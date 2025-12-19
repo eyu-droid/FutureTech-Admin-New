@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
 import { SubmissionService } from "../services/submission.service";
 import { calculateChange } from "../util/calculateStat";
+import logger from "../util/logger";
 
 export class SubmissionsController {
 
-    private submissionService: SubmissionService;
+    submissionService: any;
+
     constructor() {
         this.submissionService = new SubmissionService();
     }
@@ -95,8 +97,20 @@ export class SubmissionsController {
             res.status(400).json({ message: 'missing Id' });
             return;
         }
-        const submissions = await this.submissionService.getStartupSubmissionsById(BigInt(id));
-        res.status(200).json({ message: 'Submission fetched', data: submissions });
+
+        logger.info(`getStartupSubmissionsById called for id=${id}`);
+
+        try {
+            const submissions = await this.submissionService.getStartupSubmissionsById(BigInt(id));
+            const count = Array.isArray(submissions) ? submissions.length : (submissions ? 1 : 0);
+            logger.info(`getStartupSubmissionsById result count=${count} for id=${id}`);
+            res.status(200).json({ message: 'Submission fetched', data: submissions });
+        } catch (err) {
+            // keep err untyped in catch and cast to any when accessing stack
+            const e = err as any;
+            logger.error(`getStartupSubmissionsById error for id=${id}: ${e && (e.stack ? e.stack : e)}`);
+            res.status(500).json({ message: 'Failed to fetch submission' });
+        }
     }
 
     async getEventSubmissions(req: Request, res: Response){

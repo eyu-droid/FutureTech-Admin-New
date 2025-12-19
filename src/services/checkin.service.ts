@@ -1,36 +1,37 @@
 import defaultTemplate from "../mail/templates/defaulttemplate";
 import WelcomeTemplate from "../mail/templates/welcometemplate";
+import CheckInConfirmationTemplate from "../mail/templates/checkin_confirmation";
 import { db } from "../util/config/db";
 import logger from "../util/logger";
 import { addToMailQueue } from "../workers/mail.worker";
 
-export class CheckInService{
-    constructor(){}
+export class CheckInService {
+    constructor() { }
 
-    async checkOrderNo(orderNo:string){
-        if(!orderNo || orderNo.length > 50){
+    async checkOrderNo(orderNo: string) {
+        if (!orderNo || orderNo.length > 50) {
             // keep validation sensible; original code used > 5 which is likely incorrect for some order formats,
             // but maintain a defensive upper bound to avoid accidental long payloads.
             throw new Error('Invalid code');
         }
 
         const order = await db.orders.findFirst({
-            where:{
+            where: {
                 orderNo: orderNo
             },
         });
 
-        if(!order)
+        if (!order)
             throw new Error('ticket not found');
 
         const attendee = await db.attendees.findUnique({
-            where:{
+            where: {
                 id: order.attendeeId
             }
         });
 
         // If there is no attendee record for the order, treat as an error
-        if(!attendee){
+        if (!attendee) {
             throw new Error('attendee not found');
         }
 
@@ -51,7 +52,7 @@ export class CheckInService{
                 }
             });
 
-            if(updateRes.count === 0){
+            if (updateRes.count === 0) {
                 // nothing to do; someone else already checked this attendee in
                 const latest = await tx.attendees.findUnique({ where: { id: attendee.id } });
                 // try to fetch an existing confirmed row for completeness so the caller can refresh appropriately
@@ -97,23 +98,17 @@ export class CheckInService{
             return { status: 'success', order, attendee: updatedAttendee, confirmed: confirmedRecord };
         });
 
-        // Only enqueue the welcome mail if the transaction succeeded and the status changed
-        if(txResult && txResult.status === 'success' && txResult.attendee){
-            try{
+        // Only enqueue the check-in confirmation email if the transaction succeeded and the status changed
+        if (txResult && txResult.status === 'success' && txResult.attendee) {
+            try {
                 addToMailQueue({
                     to: txResult.attendee.email,
-                    subject: 'Welcome to Future Tech Addis Expo',
+                    subject: 'Check-In Confirmed - Future Tech Addis Expo',
                     body: '',
-                    html: defaultTemplate('','', WelcomeTemplate({
-                        ticket: order.ticket,
-                        days: '3 days',
-                        eventName: 'Future Tech Addis Expo',
-                        location: 'Addis Ababa Convention Center',
-                        time: new Date().toLocaleTimeString()
-                    }))
+                    html: CheckInConfirmationTemplate(txResult.attendee.fullname)
                 });
-            }catch(err){
-                logger.warn('Failed to enqueue welcome email after successful check-in: ' + (err as Error).message);
+            } catch (err) {
+                logger.warn('Failed to enqueue check-in confirmation email: ' + (err as Error).message);
             }
         }
 

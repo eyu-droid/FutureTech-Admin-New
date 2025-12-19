@@ -41,9 +41,9 @@ export default function defaultTemplate(body?:string, media?:string, customMessa
                                 <tr>
                                     <td style="padding: 2rem; width: 50%; vertical-align: middle;">
                                         <a href="https://futuretechaddis.com">
-                                            <img src="https://futuretechaddis.com/wp-content/uploads/2025/04/logo-future-.png"
+                                            <img src="https://futuretechaddis.com/wp-content/uploads/2025/04/white-remov-2.png"
                                                 alt="Future Tech Addis Logo"
-                                                style="height: 7rem; display: block; border: 0;">
+                                                style="height: 15rem; display: block; border: 0;">
                                         </a>
                                     </td>
                                     <td style="color: #fff; padding: 2rem; text-align: right; vertical-align: middle;">
@@ -68,7 +68,7 @@ export default function defaultTemplate(body?:string, media?:string, customMessa
                                             ${formattedBody}
                                         </p>`}
                                     ${customMessage || ''}
-                                        
+
                                         ${media && `<img src="cid:${media}" alt="QR Code" width="180" style="display: block; margin: 0 auto; max-width: 100%; height: auto; border: 1px solid #d1d5db; padding: 5px; border-radius: 4px;" />`}
                                     </td>
                                 </tr>
