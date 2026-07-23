@@ -7,10 +7,8 @@ const userController = new UserController();
 
 const userRoutes = Router();
 
-userRoutes.post('/forgot-password', AuthAPIKey, (req:Request, res:Response)=>userController.forgotPassword(req, res));
-userRoutes.post('/reset-password/:token', AuthAPIKey, (req:Request, res:Response)=>userController.verifyResetToken(req, res));
-userRoutes.post('/change-password/:token', AuthAPIKey,  (req:Request, res:Response)=> userController.resetPassword(req, res));
-userRoutes.get('/me', [AuthAPIKey, AuthGuard], (req:Request, res:Response)=>userController.me(req, res));
+
+userRoutes.get('/me', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => userController.me(req, res));
 
 userRoutes.get('/getAllUsers', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => userController.getAllUsers(req, res));
 userRoutes.post('/createUser', [AuthAPIKey, AuthGuard], (req: Request, res: Response) => userController.createUser(req, res));
