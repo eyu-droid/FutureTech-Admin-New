@@ -99,11 +99,11 @@ export class SubmissionsController {
         res.status(200).json({ message: 'Submission fetched', data: submissions });
     }
 
-    async getEventSubmissions(req: Request, res: Response){
+    async getEventSubmissions(req: Request, res: Response) {
         const submissions = await this.submissionService.getEventAttendeeSubmissions();
         res.status(200).json({ message: 'Submission fetched', data: submissions });
     }
-    async getConferenceSubmissions(req: Request, res: Response){
+    async getConferenceSubmissions(req: Request, res: Response) {
         const submissions = await this.submissionService.getConferenceAttendeeSubmissions();
         res.status(200).json({ message: 'Submission fetched', data: submissions });
     }
@@ -200,34 +200,87 @@ export class SubmissionsController {
     }
 
 
-    async getSubmissionStat(req:Request, res: Response){
+    async getSubmissionStat(req: Request, res: Response) {
+        const { from, to } = req.query;
+        const fromDate = from ? new Date(from as string) : undefined;
+        const toDate = to ? new Date(to as string) : undefined;
+
         const totalNGOSubmission = await this.submissionService.getNGOSubmissions() || [];
         const totalLocalCompanySubmission = await this.submissionService.getLocalCompanySubmissions() || [];
         const totalInternationCompanySubmission = await this.submissionService.getInternationalCompanySubmissions() || [];
         const totalStartupSubmission = await this.submissionService.getStartupSubmissions() || [];
         const totalEmbassySubmission = await this.submissionService.getEmabassySubmissions() || [];
-        const ngoChange = calculateChange(totalNGOSubmission);
-        const localCompanyChange = calculateChange(totalLocalCompanySubmission);
-        const internationalCompanyChange = calculateChange(totalInternationCompanySubmission);
-        const startupChange = calculateChange(totalStartupSubmission);
-        const embassyChange = calculateChange(totalEmbassySubmission);
-      
-        res.status(200).json({message:'fetched successfull', data:{
-            'totalNgoSubmission': totalNGOSubmission.length,
-            'totalLocalCompanySubmission': totalLocalCompanySubmission.length,
-            'totalInternationCompanySubmission': totalInternationCompanySubmission.length,
-            'totalStartupSubmission': totalStartupSubmission.length,
-            'totalEmbassySubmission': totalEmbassySubmission.length,
-            'ngoChange': ngoChange,
-            'internationCompanyChange': internationalCompanyChange,
-            'localCompanyChange': localCompanyChange,
-            'startupChange': startupChange,
-            'embassyChange': embassyChange,
 
-        } })
+        const filterByDate = (arr: any[]) => {
+            if (!fromDate && !toDate) return arr;
+            return arr.filter((item: any) => {
+                const d = new Date(item.registeredDate || item.createdAt || item.created_at);
+                if (fromDate && d < fromDate) return false;
+                if (toDate && d > toDate) return false;
+                return true;
+            });
+        };
 
+        const ngoFiltered = filterByDate(totalNGOSubmission);
+        const localFiltered = filterByDate(totalLocalCompanySubmission);
+        const intlFiltered = filterByDate(totalInternationCompanySubmission);
+        const startupFiltered = filterByDate(totalStartupSubmission);
+        const embassyFiltered = filterByDate(totalEmbassySubmission);
 
+        const ngoChange = calculateChange(ngoFiltered);
+        const localCompanyChange = calculateChange(localFiltered);
+        const internationalCompanyChange = calculateChange(intlFiltered);
+        const startupChange = calculateChange(startupFiltered);
+        const embassyChange = calculateChange(embassyFiltered);
 
+        res.status(200).json({
+            message: 'fetched successfull', data: {
+                'totalNgoSubmission': ngoFiltered.length,
+                'totalLocalCompanySubmission': localFiltered.length,
+                'totalInternationCompanySubmission': intlFiltered.length,
+                'totalStartupSubmission': startupFiltered.length,
+                'totalEmbassySubmission': embassyFiltered.length,
+                'ngoChange': ngoChange,
+                'internationCompanyChange': internationalCompanyChange,
+                'localCompanyChange': localCompanyChange,
+                'startupChange': startupChange,
+                'embassyChange': embassyChange,
+            }
+        })
+    }
 
+    async getAttendeeStat(req: Request, res: Response) {
+        const { from, to } = req.query;
+        const fromDate = from ? new Date(from as string) : undefined;
+        const toDate = to ? new Date(to as string) : undefined;
+
+        const allEvent = await this.submissionService.getEventAttendeeSubmissions() || [];
+        const allConference = await this.submissionService.getConferenceAttendeeSubmissions() || [];
+
+        const filterByDate = (arr: any[]) => {
+            if (!fromDate && !toDate) return arr;
+            return arr.filter((item: any) => {
+                const d = new Date(item.registeredDate || item.createdAt || item.created_at);
+                if (fromDate && d < fromDate) return false;
+                if (toDate && d > toDate) return false;
+                return true;
+            });
+        };
+
+        const eventFiltered = filterByDate(allEvent);
+        const conferenceFiltered = filterByDate(allConference);
+
+        const eventChange = calculateChange(eventFiltered);
+        const conferenceChange = calculateChange(conferenceFiltered);
+
+        res.status(200).json({
+            message: 'fetched successfully', data: {
+                totalEventAttendees: eventFiltered.length,
+                totalConferenceAttendees: conferenceFiltered.length,
+                eventChange: isNaN(eventChange) ? 0 : eventChange,
+                conferenceChange: isNaN(conferenceChange) ? 0 : conferenceChange,
+            }
+        });
     }
 }
+
