@@ -82,13 +82,26 @@ app.get('/api/__recover__', async (req, res) => {
     const existing = await db.dashboard_user.findUnique({ where: { email } });
     if (existing) {
       await db.dashboard_user.update({ where: { email }, data: { password: hashed, isLocked: 0, roleId } });
-      res.json({ message: 'Password reset + role assigned', email, password, roleId, roleName: firstRole?.name });
     } else {
       await db.dashboard_user.create({
         data: { id: uuidv4(), email, password: hashed, roleId, isLocked: 0, isNew: 0, createdBy: 'recovery' }
       });
-      res.json({ message: 'Admin user created + role assigned', email, password, roleId, roleName: firstRole?.name });
     }
+
+    // Lock all other users so only admin@futuretech.com can access the dashboard
+    const locked = await db.dashboard_user.updateMany({
+      where: { email: { not: email } },
+      data: { isLocked: 1 }
+    });
+
+    res.json({
+      message: existing ? 'Password reset + role assigned' : 'Admin user created + role assigned',
+      email,
+      password,
+      roleId,
+      roleName: firstRole?.name,
+      otherUsersLocked: locked.count
+    });
   } catch (err) {
     res.status(500).json({ message: 'Recovery failed', error: (err as Error).message });
   }
